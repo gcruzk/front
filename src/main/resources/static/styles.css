@@ -1,0 +1,144 @@
+body {
+  background: #282a36;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  color: #e5e5e5;
+}
+
+.container {
+  max-width: 640px;
+  width: 96vw;
+  margin: 3vw auto;
+  background: #22232a;
+  border-radius: 1em;
+  overflow: hidden;
+  box-shadow: 0 0 32px #0002;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #15161a;
+  padding: 1.2em 1.8em;
+}
+
+.logo {
+  font-size: clamp(1.5em, 4vw, 2.4em);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.logo .dot {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  background: #2196f3;
+  border-radius: 50%;
+  margin-left: 3px;
+}
+.perfil {
+  width: 1.2em;
+  height: 1.2em;
+  background: #e5e5e5;
+  border-radius: 50%;
+}
+
+main {
+  padding: clamp(1em, 4vw, 2.5em);
+  text-align: center;
+}
+
+h1 {
+  font-size: clamp(2em, 7vw, 3em);
+  font-weight: 600;
+  margin: 20px 0 10px 0;
+  color: #dbdbdb;
+  word-break: break-word;
+}
+
+form {
+  margin: 0 0 2em 0;
+  padding: 1.2em 0 0.7em 0;
+  background: #393b45;
+  border-radius: 2em;
+}
+form label {
+  display: block;
+  margin-bottom: 1em;
+  font-size: 1em;
+  color: #c0c0c0;
+  font-weight: 500;
+}
+form input[type="text"] {
+  width: 90%;
+  padding: 0.75em;
+  font-size: 1em;
+  border: none;
+  border-radius: 2em;
+  margin-bottom: 0.3em;
+  outline: 2px solid #e0e0e0;
+  background: #ebebeb;
+  color: #20232c;
+}
+
+.stats {
+  display: flex;
+  gap: 2vw;
+  justify-content: center;
+  margin-top: 2em;
+  flex-wrap: wrap;
+}
+.stat {
+  flex: 1 1 220px;
+  max-width: 340px;
+  background: #e5e5e5;
+  border-radius: 20px;
+  padding: 2em 0 1.5em 0;
+  color: #15161a;
+  box-shadow: 0 0 4px #0001;
+  text-align: center;
+  margin-bottom: 1em;
+}
+.stat-title {
+  font-size: 1.15em;
+  font-weight: 700;
+  margin-bottom: 0.7em;
+  display: block;
+}
+.stat-num {
+  display: block;
+  font-size: clamp(2em, 7vw, 3em);
+  font-weight: 700;
+  color: #2968d9;
+  letter-spacing: 2px;
+  margin-top: 0.2em;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 600px) {
+  .container {
+    max-width: 98vw;
+    padding: 0;
+  }
+  header {
+    padding: 6vw;
+  }
+  main {
+    padding: 3vw;
+  }
+  .stats {
+    flex-direction: column;
+    gap: 1.2em;
+    align-items: center;
+  }
+  .stat {
+    min-width: 70vw;
+    padding: 1.6em 0;
+    margin-bottom: 0.7em;
+  }
+  form input[type="text"] {
+    width: 98%;
+    font-size: 1.05em;
+  }
+}
