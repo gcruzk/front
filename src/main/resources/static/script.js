@@ -1,12 +1,15 @@
-// URL base da API (ajuste para sua configuração real)
-const API_BASE_URL = 'https://backvalidador-14.onrender.com';
+// URL base da API (substitua pelo domínio correto da sua API no Render)
+const API_BASE_URL = "https://backvalidador-14.onrender.com/urls";
 const API_VALIDATE = `${API_BASE_URL}/validate`;
 const API_STATS = `${API_BASE_URL}/stats`;
 
-// Atualiza as estatísticas ao carregar a página
+// Função para atualizar estatísticas na página
 function atualizarEstatisticas() {
   fetch(API_STATS)
-    .then(resp => resp.json())
+    .then(resp => {
+      if (!resp.ok) throw new Error('Status ' + resp.status);
+      return resp.json();
+    })
     .then(data => {
       document.getElementById("stat-total").textContent = data.total ?? "-";
       document.getElementById("stat-maliciosos").textContent = data.malicious ?? "-";
@@ -34,7 +37,10 @@ document.getElementById('form-links').addEventListener('submit', function(e) {
     body: JSON.stringify({ url })
   })
   .then(resp => {
-    if (!resp.ok) throw new Error('Erro na resposta da API');
+    if (!resp.ok) {
+      alert('Erro na API: ' + resp.status);
+      throw new Error('Status ' + resp.status);
+    }
     return resp.json();
   })
   .then(data => {
@@ -47,5 +53,5 @@ document.getElementById('form-links').addEventListener('submit', function(e) {
   });
 });
 
-// Atualiza estatísticas ao iniciar
+// Atualiza as estatísticas ao carregar a página
 atualizarEstatisticas();
