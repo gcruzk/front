@@ -1,5 +1,5 @@
 // URL base da API (ajuste para sua configuração real)
-const API_BASE_URL = 'https://backvalidador-14.onrender.com/';
+const API_BASE_URL = 'https://backvalidador-14.onrender.com';
 const API_VALIDATE = `${API_BASE_URL}/validate`;
 const API_STATS = `${API_BASE_URL}/stats`;
 
