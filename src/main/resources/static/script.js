@@ -1,7 +1,7 @@
 // URL base da API (substitua pelo domínio correto da sua API no Render)
 const API_BASE_URL = "https://backvalidador-14.onrender.com/urls";
-const API_VALIDATE = `${API_BASE_URL}/validate`;
 const API_STATS = `${API_BASE_URL}/stats`;
+const API_VALIDATE = `${API_BASE_URL}/validate`;
 
 // Função para atualizar estatísticas na página
 function atualizarEstatisticas() {
