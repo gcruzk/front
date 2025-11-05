@@ -49,8 +49,9 @@ document.getElementById('form-links').addEventListener('submit', function(e) {
     document.getElementById('url').value = "";
   })
   .catch(err => {
-    alert('Erro ao validar link: ' + err.message);
-  });
+  alert('Erro ao validar link: ' + err.message);
+  console.error('Erro detalhado:', err);
+});
 });
 
 // Atualiza as estatísticas ao carregar a página
