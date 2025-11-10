@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Estado da aplicação
 const appState = {
   isLoggedIn: false,
@@ -8,6 +9,12 @@ const appState = {
     malicious: 37
   }
 };
+=======
+// URL base da API (substitua pelo domínio correto da sua API no Render)
+const API_BASE_URL = "https://backvalidador-14.onrender.com/urls";
+const API_STATS = `https://backvalidador-14.onrender.com/urls/stats`;
+const API_VALIDATE = `https://backvalidador-14.onrender.com/urls/validate`;
+>>>>>>> e92e574b76416f6cf04b2a95f7b7c745ca7704ce
 
 // URLs da API (ajuste conforme seu backend)
 const API_BASE_URL = "https://backvalidador-14.onrender.com/urls";
