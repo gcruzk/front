@@ -11,24 +11,99 @@
       <div class="logo">
         <span>ZER</span><span class="dot"></span>
       </div>
-      <div class="perfil"></div>
+      <div class="perfil-switch-container">
+        <div class="switch-mode">
+          <label class="theme-switch">
+            <input type="checkbox" id="modeToggle">
+            <span class="slider">
+              <span class="icon icon-moon">🌙</span>
+              <span class="icon icon-sun">☀️</span>
+            </span>
+          </label>
+        </div>
+        <div class="perfil" id="userProfile">
+          <div class="login-btn" id="loginBtn">Login</div>
+          <div class="user-menu hidden" id="userMenu">
+            <span id="userEmail"></span>
+            <button id="logoutBtn">Sair</button>
+          </div>
+        </div>
+      </div>
     </header>
     <main>
       <h1>Seja bem-vindo</h1>
+      <p class="descricao">
+        O Zero é um sistema que permite validar links rapidamente, identificando se são maliciosos ou seguros. Insira o endereço que deseja verificar e veja o resultado em poucos segundos.
+      </p>
+      
+      <!-- Modal de Login -->
+      <div id="loginModal" class="modal hidden">
+        <div class="modal-content">
+          <h2>Login</h2>
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="email">E-mail:</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Senha:</label>
+              <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" id="loginSubmitBtn">Entrar</button>
+            <button type="button" id="cancelLoginBtn">Cancelar</button>
+          </form>
+          <div id="loginMessage" class="message hidden"></div>
+        </div>
+      </div>
+
       <form id="form-links">
         <label for="url">Insira o link abaixo:</label>
-        <input id="url" name="url" type="text" autocomplete="off" placeholder="Cole o link aqui"/>
+        <div class="input-group">
+          <input id="url" name="url" type="text" autocomplete="off" placeholder="Cole o link aqui" />
+          <button type="submit" id="validateBtn">Validar Link</button>
+        </div>
       </form>
+
+      <!-- Resultados da Validação -->
+      <div id="validationResult" class="result-container hidden">
+        <h3>Resultado da Validação</h3>
+        
+        <!-- Resultado do isMalicious (sempre visível) -->
+        <div id="maliciousResult" class="malicious-result">
+          <h4>Análise de Segurança</h4>
+          <div id="maliciousStatus"></div>
+          <div id="maliciousDetails"></div>
+        </div>
+        
+        <!-- Resultado do Gemini (apenas para logados) -->
+        <div id="geminiResult" class="gemini-result hidden">
+          <h4>📊 Análise Detalhada (Gemini)</h4>
+          <div id="categoryResult"></div>
+          <div id="summaryResult"></div>
+        </div>
+        
+        <div id="loginPrompt" class="login-prompt hidden">
+          <p>🔒 Faça login para ver a análise detalhada com IA Gemini</p>
+          <button id="showLoginBtn">Fazer Login</button>
+        </div>
+      </div>
+
       <div class="stats">
         <div class="stat">
+          <div class="icon-stat">🔎</div>
           <span class="stat-title">Quantidade de links verificados</span>
           <span class="stat-num" id="stat-total">0</span>
         </div>
         <div class="stat">
+          <div class="icon-stat">⚠️</div>
           <span class="stat-title">Links maliciosos indentificados</span>
           <span class="stat-num" id="stat-maliciosos">0</span>
         </div>
       </div>
+      <section class="illustration">
+        <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Segurança na web" />
+        <p>Proteja-se contra links maliciosos com uma verificação simples e rápida.</p>
+      </section>
     </main>
   </div>
   <script src="script.js"></script>

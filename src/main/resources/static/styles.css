@@ -1,18 +1,24 @@
 body {
+  min-width: 320px;
+  min-height: 100vh;
   background: #282a36;
   font-family: 'Segoe UI', Arial, sans-serif;
   margin: 0;
   color: #e5e5e5;
+  overflow-x: auto;
 }
 
 .container {
-  max-width: 640px;
-  width: 96vw;
-  margin: 3vw auto;
+  width: 100vw;
+  max-width: 1080px;
+  min-height: 100vh;
+  margin: 0 auto;
   background: #22232a;
   border-radius: 1em;
-  overflow: hidden;
   box-shadow: 0 0 32px #0002;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 header {
@@ -21,6 +27,74 @@ header {
   align-items: center;
   background: #15161a;
   padding: 1.2em 1.8em;
+}
+
+.perfil-switch-container{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.imput-group{
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 1.4em;
+}
+
+imput#url{
+  flex-grow: 1;
+  padding: 0.75em 1em;
+  font-size: 1.1rem;
+  border-radius: 2em;
+  border: none;
+  outline: 3px solid #2196f3;
+  transition: outline-color 0.3s;
+}
+
+input#url:focus {
+  outline-color: #1e88e5;
+}
+
+button#validateBtn {
+  background-color: #2968d9;
+  border: none;
+  padding: 0 1.5em;
+  font-size: 1.1rem;
+  border-radius: 2em;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button#validateBtn:hover {
+  background-color: #1e54b7;
+}
+
+.icon-stat {
+  font-size: 2rem;
+  margin-bottom: 0.5em;
+}
+
+.illustration {
+  margin-top: 3em;
+  text-align: center;
+  color: #a1a1a1;
+}
+
+.illustration img {
+  max-width: 150px;
+  margin-bottom: 1em;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 4px #0004);
+}
+
+.illustration p {
+  font-size: 1.1rem;
+  max-width: 320px;
+  margin: 0 auto;
+  line-height: 1.4;
 }
 
 .logo {
@@ -55,6 +129,11 @@ h1 {
   margin: 20px 0 10px 0;
   color: #dbdbdb;
   word-break: break-word;
+}
+
+.descricao {
+  margin-bottom: 2em;
+  color: #cfcfcf;
 }
 
 form {
@@ -115,30 +194,284 @@ form input[type="text"] {
   margin-top: 0.2em;
 }
 
-/* Responsividade para telas menores */
+/* Layout base mobile (entre 0 e 600px) */
 @media (max-width: 600px) {
   .container {
     max-width: 98vw;
-    padding: 0;
+    margin: 1vw auto;
+    padding: 1em;
   }
+
   header {
-    padding: 6vw;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1em;
   }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .perfil, .switch-mode {
+    margin-top: 10px;
+  }
+
   main {
-    padding: 3vw;
+    padding: 1em;
   }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .descricao {
+    font-size: 1rem;
+    margin-bottom: 1.5em;
+  }
+
+  form label {
+    font-size: 1rem;
+  }
+
+  form input[type="text"] {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 0.75em 0.8em;
+  }
+
   .stats {
     flex-direction: column;
     gap: 1.2em;
     align-items: center;
   }
+
   .stat {
-    min-width: 70vw;
-    padding: 1.6em 0;
-    margin-bottom: 0.7em;
+    width: 90vw;
+    max-width: none;
+    padding: 1em 0.5em;
+    margin-bottom: 1em;
   }
-  form input[type="text"] {
-    width: 98%;
-    font-size: 1.05em;
+
+  .stat-title {
+    font-size: 1.1rem;
   }
+
+  .stat-num {
+    font-size: 2rem;
+  }
+}
+
+/* Tema modo claro */
+body.light-mode {
+  background: #f6f6f6;
+  color: #222;
+}
+body.light-mode .container {
+  background: #fff;
+  box-shadow: 0 0 32px #bbb2;
+}
+body.light-mode header {
+  background: #f1f1f1;
+  color: #111;
+}
+body.light-mode .stat {
+  background: #f3f3f3;
+  color: #222;
+}
+body.light-mode .logo {
+  color: #222;
+}
+body.light-mode .perfil {
+  background: #222;
+}
+body.light-mode h1 {
+  color: #222;
+}
+body.light-mode .descricao {
+  color: #333;
+}
+body.light-mode form {
+  background: #efefef;
+}
+body.light-mode form input[type="text"] {
+  background: #fff;
+  color: #222;
+  outline: 2px solid #2196f3;
+}
+body.light-mode .stat-num {
+  color: #2196f3;
+}
+
+/* Switch animado (com ícones de lua e sol) */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 72px;
+  height: 34px;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events:  none;
+  border-radius: 34px;
+  transition: background .4s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.theme-switch .icon {
+  font-size: 1.4em;
+  transition: color .4s, opacity .4s, transform .4s;
+}
+
+.theme-switch .icon-moon {
+  color: #ffd700;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.theme-switch .icon-sun {
+  color: #2196f3;
+  opacity: 0.4;
+  transform: translateX(0);
+}
+
+.theme-switch input:checked + .slider {
+  background: #ffe264;
+}
+
+.theme-switch input:checked + .slider .icon-moon {
+  color: #888;
+  opacity: 0.5;
+  transform: translateX(-16px);
+}
+
+.theme-switch input:checked + .slider .icon-sun {
+  opacity: 1;
+  color: #db9200;
+  transform: translateX(16px);
+}
+
+.theme-switch .slider::before {
+  content: "";
+  display: none;
+  position: absolute;
+  left: 9px;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.4s, background .3s;
+  box-shadow: 0 2px 6px #0002;
+  z-index: 0;
+}
+
+.theme-switch input:checked + .slider::before {
+  left: 41px;
+  background: #ffd700;
+}
+
+/* Estilos para Resultados */
+.result-container {
+  margin-top: 2em;
+  padding: 1.5em;
+  background: #393b45;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.malicious-result {
+  margin-bottom: 1em;
+  padding: 1em;
+  border-radius: 8px;
+  background: #2d2f38;
+  border-left: 4px solid #2968d9;
+}
+
+.malicious-result.safe {
+  border-left-color: #2ed573;
+  background: #2ed57322;
+}
+
+.malicious-result.malicious {
+  border-left-color: #ff4757;
+  background: #ff475722;
+}
+
+.malicious-result.unknown {
+  border-left-color: #ffa502;
+  background: #ffa50222;
+}
+
+#maliciousStatus {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+#maliciousDetails {
+  font-size: 0.9em;
+  color: #cfcfcf;
+}
+
+.gemini-result {
+  margin-top: 1em;
+  padding: 1em;
+  border-radius: 8px;
+  background: #2d2f38;
+  border-left: 4px solid #8a2be2;
+}
+
+.gemini-result h4 {
+  color: #8a2be2;
+  margin-top: 0;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 1em;
+  background: #2d2f38;
+  border-radius: 8px;
+  border: 2px dashed #2968d9;
+  margin-top: 1em;
+}
+
+/* ... (mantenha os outros estilos do login e modal) ... */
+
+/* Tema claro para novos elementos */
+body.light-mode .malicious-result,
+body.light-mode .gemini-result,
+body.light-mode .login-prompt {
+  background: #f8f9fa;
+  color: #222;
+}
+
+body.light-mode .malicious-result.safe {
+  background: #d4edda;
+  border-left-color: #28a745;
+}
+
+body.light-mode .malicious-result.malicious {
+  background: #f8d7da;
+  border-left-color: #dc3545;
+}
+
+body.light-mode .malicious-result.unknown {
+  background: #fff3cd;
+  border-left-color: #ffc107;
 }
