@@ -21,11 +21,11 @@
             </span>
           </label>
         </div>
-        <div class="perfil" id="userProfile">
+        <div class="auth-section">
           <div class="login-btn" id="loginBtn">Login</div>
           <div class="user-menu hidden" id="userMenu">
-            <span id="userEmail"></span>
-            <button id="logoutBtn">Sair</button>
+            <span class="user-email" id="userEmail"></span>
+            <button class="logout-btn" id="logoutBtn">Sair</button>
           </div>
         </div>
       </div>
@@ -51,8 +51,34 @@
             </div>
             <button type="submit" id="loginSubmitBtn">Entrar</button>
             <button type="button" id="cancelLoginBtn">Cancelar</button>
+            <button type="button" id="showRegisterBtn" style="margin-top: 10px; background: transparent; border: 1px solid #2968d9; color: #2968d9; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%;">
+              Não tem conta? Registrar
+            </button>
           </form>
           <div id="loginMessage" class="message hidden"></div>
+        </div>
+      </div>
+
+      <!-- Modal de Registro -->
+      <div id="registerModal" class="modal hidden">
+        <div class="modal-content">
+          <h2>Registrar</h2>
+          <form id="registerForm">
+            <div class="form-group">
+              <label for="registerEmail">E-mail:</label>
+              <input type="email" id="registerEmail" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="registerPassword">Senha:</label>
+              <input type="password" id="registerPassword" name="password" required>
+            </div>
+            <button type="submit" id="registerSubmitBtn">Registrar</button>
+            <button type="button" id="cancelRegisterBtn">Cancelar</button>
+            <button type="button" id="showLoginFromRegisterBtn" style="margin-top: 10px; background: transparent; border: 1px solid #666; color: #666; padding: 8px 16px; border-radius: 4px; cursor: pointer; width: 100%;">
+              Já tem conta? Fazer Login
+            </button>
+          </form>
+          <div id="registerMessage" class="message hidden"></div>
         </div>
       </div>
 

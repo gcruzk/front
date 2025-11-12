@@ -1,27 +1,23 @@
-<<<<<<< HEAD
 // Estado da aplicação
 const appState = {
   isLoggedIn: false,
   userToken: null,
   userEmail: null,
   stats: {
-    total: 95,
-    malicious: 37
+    total: 0,
+    malicious: 0
   }
 };
-=======
-// URL base da API (substitua pelo domínio correto da sua API no Render)
-const API_BASE_URL = "https://backvalidador-14.onrender.com/urls";
-const API_STATS = `https://backvalidador-14.onrender.com/urls/stats`;
-const API_VALIDATE = `https://backvalidador-14.onrender.com/urls/validate`;
->>>>>>> e92e574b76416f6cf04b2a95f7b7c745ca7704ce
 
-// URLs da API (ajuste conforme seu backend)
-const API_BASE_URL = "https://backvalidador-14.onrender.com/urls";
+// URLs CORRETAS da API
+const API_BASE_URL = "https://backvalidador-14.onrender.com/api";
 const ENDPOINTS = {
-  LOGIN: `${API_BASE}/auth/login`,
-  VALIDATE: `https://backvalidador-14.onrender.com/urls/validate`,
-  GEMINI: `${API_BASE}/gemini/analyze`
+  LOGIN: `${API_BASE_URL}/auth/login`,
+  REGISTER: `${API_BASE_URL}/auth/register`,
+  VALIDATE: `${API_BASE_URL}/validate`,
+  VALIDATE_AUTH: `${API_BASE_URL}/validate-auth`,
+  GEMINI: `${API_BASE_URL}/gemini/analyze`,
+  STATS: `${API_BASE_URL}/stats`
 };
 
 // Elementos do DOM
@@ -32,7 +28,6 @@ const elements = {
   cancelLoginBtn: document.getElementById('cancelLoginBtn'),
   loginSubmitBtn: document.getElementById('loginSubmitBtn'),
   loginMessage: document.getElementById('loginMessage'),
-  userProfile: document.getElementById('userProfile'),
   userMenu: document.getElementById('userMenu'),
   userEmail: document.getElementById('userEmail'),
   logoutBtn: document.getElementById('logoutBtn'),
@@ -49,13 +44,22 @@ const elements = {
   showLoginBtn: document.getElementById('showLoginBtn'),
   modeToggle: document.getElementById('modeToggle'),
   statTotal: document.getElementById('stat-total'),
-  statMaliciosos: document.getElementById('stat-maliciosos')
+  statMaliciosos: document.getElementById('stat-maliciosos'),
+  // Elementos de registro
+  showRegisterBtn: document.getElementById('showRegisterBtn'),
+  registerModal: document.getElementById('registerModal'),
+  registerForm: document.getElementById('registerForm'),
+  cancelRegisterBtn: document.getElementById('cancelRegisterBtn'),
+  registerSubmitBtn: document.getElementById('registerSubmitBtn'),
+  showLoginFromRegisterBtn: document.getElementById('showLoginFromRegisterBtn'),
+  registerMessage: document.getElementById('registerMessage')
 };
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
   initializeApp();
   setupEventListeners();
+  loadRealStatistics();
 });
 
 function initializeApp() {
@@ -69,9 +73,6 @@ function initializeApp() {
     appState.userEmail = savedEmail;
     updateUIForLogin();
   }
-  
-  // Carregar estatísticas iniciais
-  loadStatistics();
 }
 
 function setupEventListeners() {
@@ -82,11 +83,37 @@ function setupEventListeners() {
   elements.showLoginBtn.addEventListener('click', showLoginModal);
   elements.logoutBtn.addEventListener('click', handleLogout);
   
+  // Registro
+  elements.showRegisterBtn.addEventListener('click', showRegisterModal);
+  elements.cancelRegisterBtn.addEventListener('click', hideRegisterModal);
+  elements.registerForm.addEventListener('submit', handleRegister);
+  elements.showLoginFromRegisterBtn.addEventListener('click', showLoginFromRegister);
+  
   // Validação de links
   elements.formLinks.addEventListener('submit', handleLinkValidation);
   
   // Tema
   elements.modeToggle.addEventListener('change', toggleTheme);
+}
+
+// Função para carregar estatísticas REAIS da API
+async function loadRealStatistics() {
+  try {
+    const response = await fetch(ENDPOINTS.STATS);
+    if (response.ok) {
+      const data = await response.json();
+      appState.stats.total = data.total || 0;
+      appState.stats.malicious = data.malicious || 0;
+      updateStatisticsDisplay();
+    }
+  } catch (error) {
+    console.error('Erro ao carregar estatísticas:', error);
+  }
+}
+
+function updateStatisticsDisplay() {
+  elements.statTotal.textContent = appState.stats.total;
+  elements.statMaliciosos.textContent = appState.stats.malicious;
 }
 
 // Funções de Login
@@ -130,23 +157,18 @@ async function handleLogin(e) {
       // Login bem-sucedido
       appState.isLoggedIn = true;
       appState.userToken = data.token;
-      appState.userEmail = email;
+      appState.userEmail = data.email || email;
       
       // Salvar no localStorage
       localStorage.setItem('userToken', data.token);
-      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userEmail', appState.userEmail);
       
       updateUIForLogin();
       hideLoginModal();
       showMessage('Login realizado com sucesso!', 'success');
       
-      // Se houver uma validação pendente, buscar análise do Gemini
-      const lastUrl = localStorage.getItem('lastValidatedUrl');
-      if (lastUrl) {
-        await fetchGeminiAnalysis(lastUrl);
-      }
     } else {
-      showMessage(data.message || 'Erro no login', 'error');
+      showMessage(data.error || 'Erro no login', 'error');
     }
   } catch (error) {
     showMessage('Erro de conexão. Tente novamente.', 'error');
@@ -155,6 +177,90 @@ async function handleLogin(e) {
     elements.loginSubmitBtn.disabled = false;
     elements.loginSubmitBtn.textContent = 'Entrar';
   }
+}
+
+// Funções de Registro
+function showRegisterModal() {
+  elements.registerModal.classList.remove('hidden');
+  elements.registerForm.reset();
+  hideRegisterMessage();
+  hideLoginModal();
+}
+
+function hideRegisterModal() {
+  elements.registerModal.classList.add('hidden');
+  hideRegisterMessage();
+}
+
+function showLoginFromRegister() {
+  hideRegisterModal();
+  showLoginModal();
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+  
+  if (!email || !password) {
+    showRegisterMessage('Por favor, preencha todos os campos', 'error');
+    return;
+  }
+  
+  if (password.length < 6) {
+    showRegisterMessage('A senha deve ter pelo menos 6 caracteres', 'error');
+    return;
+  }
+  
+  elements.registerSubmitBtn.disabled = true;
+  elements.registerSubmitBtn.textContent = 'Registrando...';
+  
+  try {
+    const response = await fetch(ENDPOINTS.REGISTER, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showRegisterMessage('Registro realizado com sucesso! Faça login.', 'success');
+      setTimeout(() => {
+        hideRegisterModal();
+        showLoginModal();
+      }, 2000);
+    } else {
+      // Mensagem mais amigável para email duplicado
+      const errorMsg = data.error || 'Erro no registro';
+      if (errorMsg.includes("já está em uso") || errorMsg.includes("duplicate") || errorMsg.includes("already exists")) {
+        showRegisterMessage('Este email já está cadastrado. Tente fazer login ou use outro email.', 'error');
+      } else {
+        showRegisterMessage(errorMsg, 'error');
+      }
+    }
+  } catch (error) {
+    showRegisterMessage('Erro de conexão. Tente novamente.', 'error');
+    console.error('Register error:', error);
+  } finally {
+    elements.registerSubmitBtn.disabled = false;
+    elements.registerSubmitBtn.textContent = 'Registrar';
+  }
+}
+
+function showRegisterMessage(message, type) {
+  elements.registerMessage.textContent = message;
+  elements.registerMessage.className = `message ${type}`;
+  elements.registerMessage.classList.remove('hidden');
+  
+  setTimeout(hideRegisterMessage, 5000);
+}
+
+function hideRegisterMessage() {
+  elements.registerMessage.classList.add('hidden');
 }
 
 function handleLogout() {
@@ -174,15 +280,7 @@ function updateUIForLogin() {
   elements.loginBtn.classList.add('hidden');
   elements.userMenu.classList.remove('hidden');
   elements.userEmail.textContent = appState.userEmail;
-  
-  // Esconder prompt de login se estiver visível
   elements.loginPrompt.classList.add('hidden');
-  
-  // Se já houver um resultado, buscar análise do Gemini
-  const lastUrl = localStorage.getItem('lastValidatedUrl');
-  if (lastUrl) {
-    fetchGeminiAnalysis(lastUrl);
-  }
 }
 
 function updateUIForLogout() {
@@ -190,13 +288,12 @@ function updateUIForLogout() {
   elements.userMenu.classList.add('hidden');
   elements.geminiResult.classList.add('hidden');
   
-  // Mostrar prompt de login se houver resultado
   if (!elements.validationResult.classList.contains('hidden')) {
     elements.loginPrompt.classList.remove('hidden');
   }
 }
 
-// Funções de Validação de Links
+// Função de Validação
 async function handleLinkValidation(e) {
   e.preventDefault();
   
@@ -206,133 +303,97 @@ async function handleLinkValidation(e) {
     return;
   }
   
+  if (!isValidUrl(url)) {
+    alert('Por favor, insira uma URL válida (ex: https://exemplo.com)');
+    return;
+  }
+  
   elements.validateBtn.disabled = true;
   elements.validateBtn.textContent = 'Validando...';
   
   try {
-    // SEMPRE executar validação do isMalicious
-    const maliciousResult = await validateWithIsMalicious(url);
-    displayMaliciousResult(maliciousResult);
+    let response;
+    
+    if (appState.isLoggedIn && appState.userToken) {
+      // Usuário logado: usar validate-auth
+      response = await fetch(ENDPOINTS.VALIDATE_AUTH, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${appState.userToken}`
+        },
+        body: JSON.stringify({ url })
+      });
+    } else {
+      // Usuário não logado: usar validate normal
+      response = await fetch(ENDPOINTS.VALIDATE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url })
+      });
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Erro ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    // Exibir resultados
+    displayValidationResults(data);
     
     // Atualizar estatísticas
-    updateStatistics(maliciousResult);
-    
-    // Salvar URL para possível análise posterior do Gemini
-    localStorage.setItem('lastValidatedUrl', url);
-    
-    // Se usuário está logado, buscar análise do Gemini também
-    if (appState.isLoggedIn) {
-      await fetchGeminiAnalysis(url);
-    } else {
-      showLoginPrompt();
-    }
+    await loadRealStatistics();
     
   } catch (error) {
     console.error('Validation error:', error);
-    displayMaliciousResult({
-      isMalicious: 'unknown',
-      message: 'Erro na validação',
-      details: 'Não foi possível verificar o link'
-    });
+    displayErrorResult('Erro na validação: ' + error.message);
   } finally {
     elements.validateBtn.disabled = false;
     elements.validateBtn.textContent = 'Validar Link';
   }
 }
 
-// Agente isMalicious - SEMPRE executa
-async function validateWithIsMalicious(url) {
-  // Simulação do agente isMalicious - substitua pela sua implementação real
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const random = Math.random();
-      let result;
-      
-      if (random < 0.6) {
-        // 60% de chance de ser seguro
-        result = {
-          isMalicious: false,
-          message: '✅ Link Seguro',
-          details: 'Este link foi identificado como seguro para acesso.',
-          confidence: (85 + Math.random() * 15).toFixed(1)
-        };
-      } else if (random < 0.9) {
-        // 30% de chance de ser malicioso
-        result = {
-          isMalicious: true,
-          message: '⚠️ Link Potencialmente Malicioso',
-          details: 'Recomendamos cautela ao acessar este link.',
-          confidence: (70 + Math.random() * 25).toFixed(1)
-        };
-      } else {
-        // 10% de chance de ser desconhecido
-        result = {
-          isMalicious: 'unknown',
-          message: '🔍 Status Desconhecido',
-          details: 'Não foi possível determinar a segurança deste link.',
-          confidence: (50 + Math.random() * 30).toFixed(1)
-        };
-      }
-      
-      resolve(result);
-    }, 1500);
-  });
-}
-
-// Agente Gemini - executa APENAS se usuário estiver logado
-async function fetchGeminiAnalysis(url) {
-  if (!appState.isLoggedIn || !appState.userToken) {
-    showLoginPrompt();
-    return;
+// Função para exibir resultados
+function displayValidationResults(data) {
+  elements.validationResult.classList.remove('hidden');
+  
+  let maliciousData, geminiData;
+  
+  if (data.maliciousAnalysis && data.geminiAnalysis) {
+    // Usuário logado - resposta completa
+    maliciousData = data.maliciousAnalysis;
+    geminiData = data.geminiAnalysis;
+  } else {
+    // Usuário não logado - apenas dados maliciosos
+    maliciousData = data;
+    geminiData = null;
   }
   
-  try {
-    // Mostrar loading no Gemini
+  // Exibir análise de segurança
+  displayMaliciousResult(maliciousData);
+  
+  // Exibir análise Gemini se disponível
+  if (geminiData && appState.isLoggedIn) {
+    displayGeminiResult(geminiData);
+  } else if (appState.isLoggedIn) {
+    elements.geminiResult.innerHTML = '<p>⚠️ Análise detalhada não disponível</p>';
     elements.geminiResult.classList.remove('hidden');
-    elements.categoryResult.innerHTML = '🔄 Analisando com Gemini...';
-    elements.summaryResult.innerHTML = '';
-    
-    const response = await fetch(ENDPOINTS.GEMINI, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${appState.userToken}`
-      },
-      body: JSON.stringify({ url })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      displayGeminiResult(data);
-    } else if (response.status === 401) {
-      // Token inválido - fazer logout
-      handleLogout();
-      showLoginPrompt();
-    } else {
-      throw new Error('Erro na análise do Gemini');
-    }
-  } catch (error) {
-    console.error('Gemini analysis error:', error);
-    displayGeminiResult({
-      category: 'Erro na análise',
-      summary: 'Não foi possível obter a análise detalhada do Gemini.'
-    });
+  } else {
+    showLoginPrompt();
   }
 }
 
 function displayMaliciousResult(result) {
-  elements.validationResult.classList.remove('hidden');
-  
-  // Atualizar status principal
   elements.maliciousStatus.innerHTML = `
     <strong>${result.message}</strong>
-    <br><small>Confiança: ${result.confidence}%</small>
+    <br><small>Confiança: ${result.confidence}% | Risco: ${result.riskLevel}</small>
   `;
   
-  // Atualizar detalhes
   elements.maliciousDetails.textContent = result.details;
   
-  // Aplicar classes CSS baseadas no resultado
   elements.maliciousResult.className = 'malicious-result';
   if (result.isMalicious === false) {
     elements.maliciousResult.classList.add('safe');
@@ -351,8 +412,18 @@ function displayGeminiResult(data) {
     <strong>🏷️ Categoria:</strong> ${data.category || 'Não identificada'}
   `;
   elements.summaryResult.innerHTML = `
-    <strong>📝 Resumo/Keywords:</strong> ${data.summary || 'Nenhum resumo disponível'}
+    <strong>📝 Resumo:</strong> ${data.summary || 'Nenhum resumo disponível'}
+    ${data.keywords ? `<br><strong>🔑 Keywords:</strong> ${data.keywords}` : ''}
   `;
+}
+
+function displayErrorResult(message) {
+  elements.validationResult.classList.remove('hidden');
+  elements.maliciousStatus.innerHTML = '<strong>❌ Erro na Validação</strong>';
+  elements.maliciousDetails.textContent = message;
+  elements.maliciousResult.className = 'malicious-result unknown';
+  elements.geminiResult.classList.add('hidden');
+  elements.loginPrompt.classList.add('hidden');
 }
 
 function showLoginPrompt() {
@@ -362,15 +433,13 @@ function showLoginPrompt() {
   elements.geminiResult.classList.add('hidden');
 }
 
-function updateStatistics(maliciousResult) {
-  // Incrementar contador total
-  appState.stats.total++;
-  elements.statTotal.textContent = appState.stats.total;
-  
-  // Incrementar contador de maliciosos se for malicioso
-  if (maliciousResult.isMalicious === true) {
-    appState.stats.malicious++;
-    elements.statMaliciosos.textContent = appState.stats.malicious;
+// Função auxiliar para validar URL
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
   }
 }
 
@@ -395,23 +464,5 @@ function toggleTheme() {
   }
 }
 
-function loadStatistics() {
-  // Carregar estatísticas salvas ou usar padrão
-  const savedTotal = localStorage.getItem('statsTotal');
-  const savedMalicious = localStorage.getItem('statsMalicious');
-  
-  if (savedTotal) appState.stats.total = parseInt(savedTotal);
-  if (savedMalicious) appState.stats.malicious = parseInt(savedMalicious);
-  
-  elements.statTotal.textContent = appState.stats.total;
-  elements.statMaliciosos.textContent = appState.stats.malicious;
-}
-
-// Salvar estatísticas quando a página for fechada
-window.addEventListener('beforeunload', function() {
-  localStorage.setItem('statsTotal', appState.stats.total);
-  localStorage.setItem('statsMalicious', appState.stats.malicious);
-});
-
-// Expor estado global para debugging (opcional)
+// Expor estado global para debugging
 window.appState = appState;

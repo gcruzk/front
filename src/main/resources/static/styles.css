@@ -21,28 +21,200 @@ body {
   justify-content: flex-start;
 }
 
+/* ========== HEADER CORRIGIDO ========== */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background: #15161a;
   padding: 1.2em 1.8em;
+  position: relative;
 }
 
-.perfil-switch-container{
+.perfil-switch-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 }
 
-.imput-group{
+/* ❌ REMOVER a bolinha branca do perfil */
+.perfil {
+  display: none;
+}
+
+/* ✅ ESTILOS CORRIGIDOS para o login/user */
+.login-btn {
+  background: #2968d9;
+  color: white;
+  padding: 0.6em 1.2em;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.login-btn:hover {
+  background: #1e54b7;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #2d2f38;
+  padding: 0.5em 1em;
+  border-radius: 20px;
+  border: 1px solid #444;
+}
+
+.user-email {
+  color: #e5e5e5;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.logout-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 0.4em 0.8em;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+  font-size: 0.8rem;
+}
+
+.logout-btn:hover {
+  background: #e84151;
+}
+
+/* ========== SWITCH CORRIGIDO ========== */
+.switch-mode {
+  margin-right: 10px;
+}
+
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 28px;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #444;
+  border-radius: 34px;
+  transition: .4s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.theme-switch .icon {
+  font-size: 1em;
+  transition: all 0.4s;
+  z-index: 2;
+}
+
+.theme-switch .icon-moon {
+  color: #ffd700;
+}
+
+.theme-switch .icon-sun {
+  color: #ffa502;
+  opacity: 0.7;
+}
+
+.theme-switch input:checked + .slider {
+  background: #ffe264;
+}
+
+.theme-switch input:checked + .slider .icon-moon {
+  opacity: 0.5;
+  color: #888;
+}
+
+.theme-switch input:checked + .slider .icon-sun {
+  opacity: 1;
+  color: #db9200;
+}
+
+.theme-switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 5px;
+  bottom: 4px;
+  background: white;
+  border-radius: 50%;
+  transition: .4s;
+  z-index: 1;
+}
+
+.theme-switch input:checked + .slider::before {
+  transform: translateX(32px);
+  background: #ffd700;
+}
+
+.logo {
+  font-size: clamp(1.5em, 4vw, 2.4em);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.logo .dot {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  background: #2196f3;
+  border-radius: 50%;
+  margin-left: 3px;
+}
+
+main {
+  padding: clamp(1em, 4vw, 2.5em);
+  text-align: center;
+}
+
+h1 {
+  font-size: clamp(2em, 7vw, 3em);
+  font-weight: 600;
+  margin: 20px 0 10px 0;
+  color: #dbdbdb;
+  word-break: break-word;
+}
+
+.descricao {
+  margin-bottom: 2em;
+  color: #cfcfcf;
+}
+
+.input-group{
   display: flex;
   justify-content: center;
   gap: 12px;
   margin-bottom: 1.4em;
+  padding: 0 1em;
 }
 
-imput#url{
+input#url{
   flex-grow: 1;
   padding: 0.75em 1em;
   font-size: 1.1rem;
@@ -50,6 +222,8 @@ imput#url{
   border: none;
   outline: 3px solid #2196f3;
   transition: outline-color 0.3s;
+  background: #ebebeb;
+  color: #20232c;
 }
 
 input#url:focus {
@@ -66,10 +240,30 @@ button#validateBtn {
   font-weight: 700;
   cursor: pointer;
   transition: background-color 0.3s;
+  white-space: nowrap;
 }
 
 button#validateBtn:hover {
   background-color: #1e54b7;
+}
+
+button#validateBtn:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+form {
+  margin: 0 0 2em 0;
+  padding: 1.2em 0 0.7em 0;
+  background: #393b45;
+  border-radius: 2em;
+}
+form label {
+  display: block;
+  margin-bottom: 1em;
+  font-size: 1em;
+  color: #c0c0c0;
+  font-weight: 500;
 }
 
 .icon-stat {
@@ -95,70 +289,6 @@ button#validateBtn:hover {
   max-width: 320px;
   margin: 0 auto;
   line-height: 1.4;
-}
-
-.logo {
-  font-size: clamp(1.5em, 4vw, 2.4em);
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1px;
-}
-.logo .dot {
-  display: inline-block;
-  width: 0.9em;
-  height: 0.9em;
-  background: #2196f3;
-  border-radius: 50%;
-  margin-left: 3px;
-}
-.perfil {
-  width: 1.2em;
-  height: 1.2em;
-  background: #e5e5e5;
-  border-radius: 50%;
-}
-
-main {
-  padding: clamp(1em, 4vw, 2.5em);
-  text-align: center;
-}
-
-h1 {
-  font-size: clamp(2em, 7vw, 3em);
-  font-weight: 600;
-  margin: 20px 0 10px 0;
-  color: #dbdbdb;
-  word-break: break-word;
-}
-
-.descricao {
-  margin-bottom: 2em;
-  color: #cfcfcf;
-}
-
-form {
-  margin: 0 0 2em 0;
-  padding: 1.2em 0 0.7em 0;
-  background: #393b45;
-  border-radius: 2em;
-}
-form label {
-  display: block;
-  margin-bottom: 1em;
-  font-size: 1em;
-  color: #c0c0c0;
-  font-weight: 500;
-}
-form input[type="text"] {
-  width: 90%;
-  padding: 0.75em;
-  font-size: 1em;
-  border: none;
-  border-radius: 2em;
-  margin-bottom: 0.3em;
-  outline: 2px solid #e0e0e0;
-  background: #ebebeb;
-  color: #20232c;
 }
 
 .stats {
@@ -206,14 +336,28 @@ form input[type="text"] {
     flex-direction: column;
     align-items: flex-start;
     padding: 1em;
+    gap: 10px;
+  }
+
+  .perfil-switch-container {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-menu {
+    padding: 0.4em 0.8em;
+  }
+
+  .user-email {
+    font-size: 0.8rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .logo {
     font-size: 1.5rem;
-  }
-
-  .perfil, .switch-mode {
-    margin-top: 10px;
   }
 
   main {
@@ -274,15 +418,27 @@ body.light-mode header {
   background: #f1f1f1;
   color: #111;
 }
+body.light-mode .user-menu {
+  background: #e9ecef;
+  border: 1px solid #dee2e6;
+}
+body.light-mode .user-email {
+  color: #222;
+}
+body.light-mode .login-btn {
+  background: #2968d9;
+  color: white;
+}
+body.light-mode .logout-btn {
+  background: #ff4757;
+  color: white;
+}
 body.light-mode .stat {
   background: #f3f3f3;
   color: #222;
 }
 body.light-mode .logo {
   color: #222;
-}
-body.light-mode .perfil {
-  background: #222;
 }
 body.light-mode h1 {
   color: #222;
@@ -300,90 +456,6 @@ body.light-mode form input[type="text"] {
 }
 body.light-mode .stat-num {
   color: #2196f3;
-}
-
-/* Switch animado (com ícones de lua e sol) */
-.theme-switch {
-  position: relative;
-  display: inline-block;
-  width: 72px;
-  height: 34px;
-}
-
-.theme-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.theme-switch .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: transparent !important;
-  box-shadow: none !important;
-  pointer-events:  none;
-  border-radius: 34px;
-  transition: background .4s;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  box-sizing: border-box;
-  z-index: 1;
-}
-
-.theme-switch .icon {
-  font-size: 1.4em;
-  transition: color .4s, opacity .4s, transform .4s;
-}
-
-.theme-switch .icon-moon {
-  color: #ffd700;
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.theme-switch .icon-sun {
-  color: #2196f3;
-  opacity: 0.4;
-  transform: translateX(0);
-}
-
-.theme-switch input:checked + .slider {
-  background: #ffe264;
-}
-
-.theme-switch input:checked + .slider .icon-moon {
-  color: #888;
-  opacity: 0.5;
-  transform: translateX(-16px);
-}
-
-.theme-switch input:checked + .slider .icon-sun {
-  opacity: 1;
-  color: #db9200;
-  transform: translateX(16px);
-}
-
-.theme-switch .slider::before {
-  content: "";
-  display: none;
-  position: absolute;
-  left: 9px;
-  top: 6px;
-  width: 22px;
-  height: 22px;
-  background: #fff;
-  border-radius: 50%;
-  transition: left 0.4s, background .3s;
-  box-shadow: 0 2px 6px #0002;
-  z-index: 0;
-}
-
-.theme-switch input:checked + .slider::before {
-  left: 41px;
-  background: #ffd700;
 }
 
 /* Estilos para Resultados */
@@ -451,7 +523,130 @@ body.light-mode .stat-num {
   margin-top: 1em;
 }
 
-/* ... (mantenha os outros estilos do login e modal) ... */
+/* Estilos para Modais */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #393b45;
+  padding: 2em;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #e5e5e5;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.2em;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5em;
+  color: #cfcfcf;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75em;
+  border: none;
+  border-radius: 8px;
+  background: #ebebeb;
+  color: #20232c;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.modal-content button {
+  width: 100%;
+  padding: 0.75em;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-bottom: 0.5em;
+  transition: background-color 0.3s;
+}
+
+.modal-content button[type="submit"] {
+  background: #2968d9;
+  color: white;
+  font-weight: bold;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: #1e54b7;
+}
+
+.modal-content button[type="button"] {
+  background: #666;
+  color: white;
+}
+
+.modal-content button[type="button"]:hover {
+  background: #555;
+}
+
+.message {
+  padding: 0.75em;
+  border-radius: 8px;
+  margin-top: 1em;
+  text-align: center;
+  font-weight: 500;
+}
+
+.message.success {
+  background: #2ed57322;
+  color: #2ed573;
+  border: 1px solid #2ed573;
+}
+
+.message.error {
+  background: #ff475722;
+  color: #ff4757;
+  border: 1px solid #ff4757;
+}
+
+/* Tema claro para modais */
+body.light-mode .modal-content {
+  background: #fff;
+  color: #222;
+}
+
+body.light-mode .modal-content h2 {
+  color: #222;
+}
+
+body.light-mode .form-group label {
+  color: #333;
+}
+
+body.light-mode .form-group input {
+  background: #fff;
+  color: #222;
+  border: 1px solid #ddd;
+}
 
 /* Tema claro para novos elementos */
 body.light-mode .malicious-result,
@@ -474,4 +669,8 @@ body.light-mode .malicious-result.malicious {
 body.light-mode .malicious-result.unknown {
   background: #fff3cd;
   border-left-color: #ffc107;
+}
+
+.hidden {
+  display: none !important;
 }
