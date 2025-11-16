@@ -9,19 +9,16 @@ const appState = {
   }
 };
 
-
-
-//local
-//const API_BASE_URL = "http://localhost:8080";
-
 // Render
 const API_BASE_URL = "https://backvalidador-14.onrender.com";
+// local: 
+// const API_BASE_URL = "http://localhost:8080"
 
 const ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
   VALIDATE: `${API_BASE_URL}/api/validate`,
-  VALIDATE_AUTH: `${API_BASE_URL}/api/validate-auth`,
+  VALIDATE_AUTH: `${API_BASE_URL}/api/validate`, 
   GEMINI: `${API_BASE_URL}/api/gemini/analyze`,
   STATS: `${API_BASE_URL}/api/stats`
 };
@@ -113,12 +110,16 @@ function setupEventListeners() {
 // Função para carregar estatísticas REAIS da API
 async function loadRealStatistics() {
   try {
+    console.log('Carregando estatísticas de:', ENDPOINTS.STATS);
     const response = await fetch(ENDPOINTS.STATS);
     if (response.ok) {
       const data = await response.json();
       appState.stats.total = data.total || 0;
       appState.stats.malicious = data.malicious || 0;
       updateStatisticsDisplay();
+      console.log('Estatísticas carregadas:', data);
+    } else {
+      console.error('Erro ao carregar estatísticas:', response.status);
     }
   } catch (error) {
     console.error('Erro ao carregar estatísticas:', error);
@@ -160,6 +161,7 @@ async function handleLogin(e) {
   elements.loginSubmitBtn.classList.add('loading');
   
   try {
+    console.log('Tentando login em:', ENDPOINTS.LOGIN);
     const response = await fetch(ENDPOINTS.LOGIN, {
       method: 'POST',
       headers: {
@@ -169,6 +171,7 @@ async function handleLogin(e) {
     });
     
     const data = await response.json();
+    console.log('Resposta do login:', data);
     
     if (response.ok && data.token) {
       // Login bem-sucedido
@@ -238,6 +241,7 @@ async function handleRegister(e) {
   elements.registerSubmitBtn.classList.add('loading');
   
   try {
+    console.log('Tentando registro em:', ENDPOINTS.REGISTER);
     const response = await fetch(ENDPOINTS.REGISTER, {
       method: 'POST',
       headers: {
@@ -247,6 +251,7 @@ async function handleRegister(e) {
     });
     
     const data = await response.json();
+    console.log('Resposta do registro:', data);
     
     if (response.ok) {
       showRegisterMessage('Registro realizado com sucesso! Faça login.', 'success');
@@ -315,7 +320,7 @@ function updateUIForLogout() {
   }
 }
 
-// Função de Validação
+// Função de Validação - CORRIGIDA
 async function handleLinkValidation(e) {
   e.preventDefault();
   
@@ -335,35 +340,39 @@ async function handleLinkValidation(e) {
   elements.validateBtn.classList.add('loading');
   
   try {
-    let response;
     const urlToValidate = normalizeUrl(url);
+    console.log('Validando URL:', urlToValidate);
     
+    // ✅ CORREÇÃO: Sempre usar o endpoint /api/validate
+    // O back-end já trata a autenticação pelo header Authorization
+    const endpoint = ENDPOINTS.VALIDATE;
+    console.log('Usando endpoint:', endpoint);
+    
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: urlToValidate })
+    };
+    
+    // Adicionar token se estiver logado
     if (appState.isLoggedIn && appState.userToken) {
-      // Usuário logado: usar validate-auth
-      response = await fetch(ENDPOINTS.VALIDATE_AUTH, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${appState.userToken}`
-        },
-        body: JSON.stringify({ url: urlToValidate })
-      });
-    } else {
-      // Usuário não logado: usar validate normal
-      response = await fetch(ENDPOINTS.VALIDATE, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: urlToValidate })
-      });
+      requestOptions.headers['Authorization'] = `Bearer ${appState.userToken}`;
+      console.log('Enviando com token de autenticação');
     }
     
+    const response = await fetch(endpoint, requestOptions);
+    console.log('Resposta da validação:', response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro detalhado:', errorText);
       throw new Error(`Erro ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
+    console.log('Dados da validação:', data);
     
     // Exibir resultados
     displayValidationResults(data);
@@ -387,12 +396,13 @@ function displayValidationResults(data) {
   
   let maliciousData, geminiData;
   
-  if (data.maliciousAnalysis && data.geminiAnalysis) {
-    // Usuário logado - resposta completa
-    maliciousData = data.maliciousAnalysis;
+  // ✅ CORREÇÃO: Verificar a estrutura da resposta
+  if (data.maliciousAnalysis !== undefined) {
+    // Resposta com estrutura separada
+    maliciousData = data.maliciousAnalysis || data;
     geminiData = data.geminiAnalysis;
   } else {
-    // Usuário não logado - apenas dados maliciosos
+    // Resposta direta (usuário não logado)
     maliciousData = data;
     geminiData = null;
   }
@@ -403,8 +413,11 @@ function displayValidationResults(data) {
   // Exibir análise Gemini se disponível
   if (geminiData && appState.isLoggedIn) {
     displayGeminiResult(geminiData);
+  } else if (appState.isLoggedIn && data.category) {
+    // Se os dados do Gemini vierem junto com a resposta principal
+    displayGeminiResult(data);
   } else if (appState.isLoggedIn) {
-    elements.geminiResult.innerHTML = '<p>⚠️ Análise detalhada não disponível</p>';
+    elements.geminiResult.innerHTML = '<p>⚠️ Análise detalhada não disponível no momento</p>';
     elements.geminiResult.classList.remove('hidden');
   } else {
     showLoginPrompt();
@@ -412,12 +425,19 @@ function displayValidationResults(data) {
 }
 
 function displayMaliciousResult(result) {
+  if (!result) {
+    elements.maliciousStatus.innerHTML = '<strong>❌ Dados de validação não disponíveis</strong>';
+    elements.maliciousDetails.textContent = 'Não foi possível obter informações sobre esta URL.';
+    elements.maliciousResult.className = 'malicious-result unknown';
+    return;
+  }
+  
   elements.maliciousStatus.innerHTML = `
-    <strong>${result.message}</strong>
-    <br><small>Confiança: ${result.confidence}% | Nível de Risco: ${result.riskLevel}</small>
+    <strong>${result.message || 'Status desconhecido'}</strong>
+    <br><small>Confiança: ${result.confidence || 0}% | Nível de Risco: ${result.riskLevel || 'DESCONHECIDO'}</small>
   `;
   
-  elements.maliciousDetails.textContent = result.details;
+  elements.maliciousDetails.textContent = result.details || 'Nenhum detalhe adicional disponível.';
   
   elements.maliciousResult.className = 'malicious-result';
   if (result.isMalicious === false) {
@@ -432,6 +452,13 @@ function displayMaliciousResult(result) {
 function displayGeminiResult(data) {
   elements.geminiResult.classList.remove('hidden');
   elements.loginPrompt.classList.add('hidden');
+  
+  if (!data) {
+    elements.categoryResult.innerHTML = '<strong>🏷️ Categoria:</strong> Não disponível';
+    elements.summaryResult.innerHTML = '<strong>📝 Resumo:</strong> Nenhuma análise disponível';
+    elements.geminiDetails.innerHTML = '<div>Informações não disponíveis</div>';
+    return;
+  }
   
   elements.categoryResult.innerHTML = `
     <strong>🏷️ Categoria:</strong> ${data.category || 'Não identificada'}
@@ -474,10 +501,10 @@ function showLoginPrompt() {
 function isValidUrl(string) {
   try {
     const url = new URL(string);
-    
+    // Verificar se tem protocolo válido
     return url.protocol === 'http:' || url.protocol === 'https:';
   } catch (_) {
-    
+    // Tentar adicionar https:// se não tiver protocolo
     try {
       new URL('https://' + string);
       return true;
@@ -487,19 +514,19 @@ function isValidUrl(string) {
   }
 }
 
-// Função para normalizar URL 
+// Função para normalizar URL (adicionar protocolo se necessário)
 function normalizeUrl(url) {
   try {
     new URL(url);
-    return url; 
+    return url; // URL já é válida
   } catch (_) {
-    return 'https://' + url; 
+    return 'https://' + url; // Adicionar https://
   }
 }
 
 // Funções utilitárias
 function showMessage(message, type) {
-  
+  // Criar mensagem flutuante se não estiver em um modal
   if (elements.loginModal.classList.contains('hidden')) {
     const floatingMessage = document.createElement('div');
     floatingMessage.className = `message ${type}`;
@@ -538,6 +565,7 @@ function toggleTheme() {
   }
 }
 
-
+// Expor estado global para debugging
 window.appState = appState;
-window.ENDPOINTS = ENDPOINTS; 
+window.ENDPOINTS = ENDPOINTS;
+console.log('Frontend inicializado. Endpoints configurados:', ENDPOINTS);
