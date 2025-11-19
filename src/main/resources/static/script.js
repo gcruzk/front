@@ -9,16 +9,16 @@ const appState = {
   }
 };
 
-// Render
-const API_BASE_URL = "https://backvalidador-14.onrender.com";
-// local: 
-// const API_BASE_URL = "http://localhost:8080"
+
+//const API_BASE_URL = "https://backvalidador-14.onrender.com";
+//local 
+const API_BASE_URL = "http://localhost:8080";
 
 const ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
   VALIDATE: `${API_BASE_URL}/api/validate`,
-  VALIDATE_AUTH: `${API_BASE_URL}/api/validate`, 
+  VALIDATE_AUTH: `${API_BASE_URL}/api/validate-auth`,
   GEMINI: `${API_BASE_URL}/api/gemini/analyze`,
   STATS: `${API_BASE_URL}/api/stats`
 };
@@ -61,6 +61,7 @@ const elements = {
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 Frontend inicializando...');
   initializeApp();
   setupEventListeners();
   loadRealStatistics();
@@ -76,6 +77,7 @@ function initializeApp() {
     appState.userToken = savedToken;
     appState.userEmail = savedEmail;
     updateUIForLogin();
+    console.log('✅ Usuário recuperado do localStorage:', savedEmail);
   }
   
   // Verificar tema salvo
@@ -84,6 +86,8 @@ function initializeApp() {
     elements.modeToggle.checked = true;
     document.body.classList.add('light-mode');
   }
+  
+  console.log('🎯 Endpoints configurados:', ENDPOINTS);
 }
 
 function setupEventListeners() {
@@ -105,24 +109,26 @@ function setupEventListeners() {
   
   // Tema
   elements.modeToggle.addEventListener('change', toggleTheme);
+  
+  console.log('✅ Event listeners configurados');
 }
 
 // Função para carregar estatísticas REAIS da API
 async function loadRealStatistics() {
   try {
-    console.log('Carregando estatísticas de:', ENDPOINTS.STATS);
+    console.log('📊 Carregando estatísticas de:', ENDPOINTS.STATS);
     const response = await fetch(ENDPOINTS.STATS);
     if (response.ok) {
       const data = await response.json();
       appState.stats.total = data.total || 0;
       appState.stats.malicious = data.malicious || 0;
       updateStatisticsDisplay();
-      console.log('Estatísticas carregadas:', data);
+      console.log('✅ Estatísticas carregadas:', data);
     } else {
-      console.error('Erro ao carregar estatísticas:', response.status);
+      console.error('❌ Erro ao carregar estatísticas:', response.status);
     }
   } catch (error) {
-    console.error('Erro ao carregar estatísticas:', error);
+    console.error('❌ Erro ao carregar estatísticas:', error);
   }
 }
 
@@ -161,7 +167,7 @@ async function handleLogin(e) {
   elements.loginSubmitBtn.classList.add('loading');
   
   try {
-    console.log('Tentando login em:', ENDPOINTS.LOGIN);
+    console.log('🔐 Tentando login em:', ENDPOINTS.LOGIN);
     const response = await fetch(ENDPOINTS.LOGIN, {
       method: 'POST',
       headers: {
@@ -171,7 +177,7 @@ async function handleLogin(e) {
     });
     
     const data = await response.json();
-    console.log('Resposta do login:', data);
+    console.log('📨 Resposta do login:', data);
     
     if (response.ok && data.token) {
       // Login bem-sucedido
@@ -186,13 +192,14 @@ async function handleLogin(e) {
       updateUIForLogin();
       hideLoginModal();
       showMessage('Login realizado com sucesso!', 'success');
+      console.log('✅ Login bem-sucedido para:', email);
       
     } else {
       showMessage(data.error || 'Erro no login. Verifique suas credenciais.', 'error');
     }
   } catch (error) {
     showMessage('Erro de conexão. Verifique se o servidor está rodando.', 'error');
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
   } finally {
     elements.loginSubmitBtn.disabled = false;
     elements.loginSubmitBtn.textContent = 'Entrar';
@@ -241,7 +248,7 @@ async function handleRegister(e) {
   elements.registerSubmitBtn.classList.add('loading');
   
   try {
-    console.log('Tentando registro em:', ENDPOINTS.REGISTER);
+    console.log('📝 Tentando registro em:', ENDPOINTS.REGISTER);
     const response = await fetch(ENDPOINTS.REGISTER, {
       method: 'POST',
       headers: {
@@ -251,7 +258,7 @@ async function handleRegister(e) {
     });
     
     const data = await response.json();
-    console.log('Resposta do registro:', data);
+    console.log('📨 Resposta do registro:', data);
     
     if (response.ok) {
       showRegisterMessage('Registro realizado com sucesso! Faça login.', 'success');
@@ -270,7 +277,7 @@ async function handleRegister(e) {
     }
   } catch (error) {
     showRegisterMessage('Erro de conexão. Verifique se o servidor está rodando.', 'error');
-    console.error('Register error:', error);
+    console.error('❌ Register error:', error);
   } finally {
     elements.registerSubmitBtn.disabled = false;
     elements.registerSubmitBtn.textContent = 'Registrar';
@@ -301,6 +308,7 @@ function handleLogout() {
   
   updateUIForLogout();
   showMessage('Logout realizado com sucesso!', 'success');
+  console.log('👋 Usuário deslogado');
 }
 
 function updateUIForLogin() {
@@ -308,6 +316,7 @@ function updateUIForLogin() {
   elements.userMenu.classList.remove('hidden');
   elements.userEmail.textContent = appState.userEmail;
   elements.loginPrompt.classList.add('hidden');
+  console.log('👤 Interface atualizada para usuário logado');
 }
 
 function updateUIForLogout() {
@@ -318,6 +327,7 @@ function updateUIForLogout() {
   if (!elements.validationResult.classList.contains('hidden')) {
     elements.loginPrompt.classList.remove('hidden');
   }
+  console.log('👤 Interface atualizada para usuário deslogado');
 }
 
 // Função de Validação - CORRIGIDA
@@ -341,12 +351,11 @@ async function handleLinkValidation(e) {
   
   try {
     const urlToValidate = normalizeUrl(url);
-    console.log('Validando URL:', urlToValidate);
+    console.log('🔍 Validando URL:', urlToValidate);
     
-    // ✅ CORREÇÃO: Sempre usar o endpoint /api/validate
-    // O back-end já trata a autenticação pelo header Authorization
-    const endpoint = ENDPOINTS.VALIDATE;
-    console.log('Usando endpoint:', endpoint);
+    
+    const endpoint = appState.isLoggedIn ? ENDPOINTS.VALIDATE_AUTH : ENDPOINTS.VALIDATE;
+console.log('🌐 Usando endpoint:', endpoint);
     
     const requestOptions = {
       method: 'POST',
@@ -359,20 +368,25 @@ async function handleLinkValidation(e) {
     // Adicionar token se estiver logado
     if (appState.isLoggedIn && appState.userToken) {
       requestOptions.headers['Authorization'] = `Bearer ${appState.userToken}`;
-      console.log('Enviando com token de autenticação');
+      console.log('🔑 Enviando com token de autenticação');
+    } else {
+      console.log('👤 Usuário não logado - validação básica');
     }
+    console.log('🔐 Estado do login:', appState.isLoggedIn);
+    console.log('🔑 Token:', appState.userToken);
+    
     
     const response = await fetch(endpoint, requestOptions);
-    console.log('Resposta da validação:', response.status);
+    console.log('📨 Resposta da validação - Status:', response.status);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Erro detalhado:', errorText);
+      console.error('❌ Erro detalhado:', errorText);
       throw new Error(`Erro ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('Dados da validação:', data);
+    console.log('📊 Dados da validação recebidos:', data);
     
     // Exibir resultados
     displayValidationResults(data);
@@ -381,7 +395,7 @@ async function handleLinkValidation(e) {
     await loadRealStatistics();
     
   } catch (error) {
-    console.error('Validation error:', error);
+    console.error('❌ Validation error:', error);
     displayErrorResult('Erro na validação: ' + error.message);
   } finally {
     elements.validateBtn.disabled = false;
@@ -396,15 +410,19 @@ function displayValidationResults(data) {
   
   let maliciousData, geminiData;
   
-  // ✅ CORREÇÃO: Verificar a estrutura da resposta
+  console.log('🎯 Estrutura dos dados recebidos:', data);
+  
+  
   if (data.maliciousAnalysis !== undefined) {
-    // Resposta com estrutura separada
+    // Resposta com estrutura separada (usuário logado)
     maliciousData = data.maliciousAnalysis || data;
     geminiData = data.geminiAnalysis;
+    console.log('📋 Estrutura: maliciousAnalysis + geminiAnalysis');
   } else {
     // Resposta direta (usuário não logado)
     maliciousData = data;
     geminiData = null;
+    console.log('📋 Estrutura: resposta direta');
   }
   
   // Exibir análise de segurança
@@ -412,14 +430,18 @@ function displayValidationResults(data) {
   
   // Exibir análise Gemini se disponível
   if (geminiData && appState.isLoggedIn) {
+    console.log('🤖 Exibindo análise Gemini:', geminiData);
     displayGeminiResult(geminiData);
   } else if (appState.isLoggedIn && data.category) {
     // Se os dados do Gemini vierem junto com a resposta principal
+    console.log('🤖 Exibindo dados Gemini da resposta principal:', data);
     displayGeminiResult(data);
   } else if (appState.isLoggedIn) {
+    console.log('⚠️ Usuário logado mas sem dados Gemini');
     elements.geminiResult.innerHTML = '<p>⚠️ Análise detalhada não disponível no momento</p>';
     elements.geminiResult.classList.remove('hidden');
   } else {
+    console.log('🔒 Usuário não logado - mostrando prompt de login');
     showLoginPrompt();
   }
 }
@@ -447,11 +469,15 @@ function displayMaliciousResult(result) {
   } else {
     elements.maliciousResult.classList.add('unknown');
   }
+  
+  console.log('🛡️ Análise de segurança exibida:', result);
 }
 
 function displayGeminiResult(data) {
   elements.geminiResult.classList.remove('hidden');
   elements.loginPrompt.classList.add('hidden');
+  
+  console.log("📊 Dados do Gemini para exibição:", data);
   
   if (!data) {
     elements.categoryResult.innerHTML = '<strong>🏷️ Categoria:</strong> Não disponível';
@@ -460,25 +486,34 @@ function displayGeminiResult(data) {
     return;
   }
   
+  // Garantir que todos os campos existam
+  const category = data.category || 'Não categorizado';
+  const summary = data.summary || 'Nenhum resumo disponível';
+  const keywords = data.keywords || 'Nenhuma palavra-chave';
+  const trustLevel = data.trustLevel || 'Nível de confiança não disponível';
+  const characteristics = data.characteristics || 'Características não disponíveis';
+  
   elements.categoryResult.innerHTML = `
-    <strong>🏷️ Categoria:</strong> ${data.category || 'Não identificada'}
-    ${data.trustLevel && data.trustLevel !== 'N/A' ? `<br><strong>🛡️ Nível de Confiança:</strong> ${data.trustLevel}` : ''}
+    <strong>🏷️ Categoria:</strong> ${category}
+    ${trustLevel && trustLevel !== 'N/A' ? `<br><strong>🛡️ Nível de Confiança:</strong> ${trustLevel}` : ''}
   `;
   
   elements.summaryResult.innerHTML = `
-    <strong>📝 Resumo:</strong> ${data.summary || 'Nenhum resumo disponível'}
+    <strong>📝 Resumo:</strong> ${summary}
   `;
   
   // Detalhes adicionais do Gemini
   let detailsHTML = '';
-  if (data.keywords && data.keywords !== 'N/A') {
-    detailsHTML += `<div><strong>🔑 Palavras-chave:</strong> ${data.keywords}</div>`;
+  if (keywords && keywords !== 'N/A' && keywords !== 'Nenhuma palavra-chave') {
+    detailsHTML += `<div><strong>🔑 Palavras-chave:</strong> ${keywords}</div>`;
   }
-  if (data.characteristics && data.characteristics !== 'N/A') {
-    detailsHTML += `<div><strong>📊 Características:</strong> ${data.characteristics}</div>`;
+  if (characteristics && characteristics !== 'N/A' && characteristics !== 'Características não disponíveis') {
+    detailsHTML += `<div><strong>📊 Características:</strong> ${characteristics}</div>`;
   }
   
   elements.geminiDetails.innerHTML = detailsHTML || '<div>Nenhuma informação adicional disponível</div>';
+  
+  console.log('✅ Análise Gemini exibida com sucesso');
 }
 
 function displayErrorResult(message) {
@@ -568,4 +603,4 @@ function toggleTheme() {
 // Expor estado global para debugging
 window.appState = appState;
 window.ENDPOINTS = ENDPOINTS;
-console.log('Frontend inicializado. Endpoints configurados:', ENDPOINTS);
+console.log('🚀 Frontend completamente inicializado e pronto!');
